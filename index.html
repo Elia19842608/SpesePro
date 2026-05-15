@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spese Progetti</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #181818;
+    --surface2: #222222;
+    --border: #2a2a2a;
+    --accent: #c8f04a;
+    --accent2: #f0c84a;
+    --text: #f0f0f0;
+    --muted: #888;
+    --danger: #ff5c5c;
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 40px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(15,15,15,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--accent); }
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .breadcrumb .crumb {
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .breadcrumb .crumb:hover { color: var(--text); }
+  .breadcrumb .sep { color: var(--border); }
+  .breadcrumb .current { color: var(--accent); font-weight: 500; }
+  .header-actions { display: flex; gap: 10px; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #0f0f0f;
+  }
+  .btn-primary:hover { background: #d8ff5a; transform: translateY(-1px); }
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+  }
+  .btn-danger:hover { background: var(--danger); color: #fff; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    padding: 6px 10px;
+  }
+  .btn-ghost:hover { color: var(--text); }
+  .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* MAIN */
+  main { padding: 40px; max-width: 1400px; margin: 0 auto; }
+
+  /* SECTION TITLE */
+  .section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+  .section-subtitle {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin-top: 4px;
+  }
+
+  /* PROJECT CARDS GRID */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  .project-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .project-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-color, var(--accent));
+    transition: height 0.25s;
+  }
+  .project-card:hover { border-color: var(--card-color, var(--accent)); transform: translateY(-3px); box-shadow: var(--shadow); }
+  .project-card:hover::before { height: 4px; }
+  .card-icon {
+    font-size: 2rem;
+    margin-bottom: 14px;
+  }
+  .card-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .card-desc {
+    color: var(--muted);
+    font-size: 0.82rem;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    min-height: 36px;
+  }
+  .card-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .card-total-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .card-total-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--card-color, var(--accent));
+  }
+  .card-count { font-size: 0.78rem; color: var(--muted); text-align: right; }
+  .card-actions {
+    position: absolute;
+    top: 12px; right: 12px;
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .project-card:hover .card-actions { opacity: 1; }
+  .card-action-btn {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    background: rgba(30,30,30,0.9);
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .card-action-btn:hover { color: var(--danger); background: rgba(255,92,92,0.15); }
+  .card-action-btn.edit:hover { color: var(--accent); background: rgba(200,240,74,0.15); }
+
+  /* ADD PROJECT CARD */
+  .add-project-card {
+    background: transparent;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 180px;
+    color: var(--muted);
+  }
+  .add-project-card:hover { border-color: var(--accent); color: var(--accent); }
+  .add-project-card .plus { font-size: 2rem; }
+  .add-project-card span { font-size: 0.88rem; font-weight: 500; }
+
+  /* PROJECT DETAIL */
+  .detail-view { display: none; }
+  .detail-view.active { display: block; }
+  .overview-view { display: block; }
+  .overview-view.hidden { display: none; }
+
+  .project-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 36px;
+    gap: 20px;
+  }
+  .project-title-block { flex: 1; }
+  .project-main-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .project-main-desc { color: var(--muted); font-size: 0.9rem; }
+
+  /* SUMMARY PILLS */
+  .summary-pills {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+  .pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .pill-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .pill-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .pill-value.accent { color: var(--accent); }
+
+  /* CATEGORY SECTIONS */
+  .categories-container { display: flex; flex-direction: column; gap: 24px; }
+  .category-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .category-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid var(--border);
+  }
+  .category-header:hover { background: var(--surface2); }
+  .category-name-group { display: flex; align-items: center; gap: 10px; }
+  .cat-icon { font-size: 1.2rem; }
+  .cat-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .cat-count { font-size: 0.78rem; color: var(--muted); }
+  .cat-total {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--accent);
+  }
+  .cat-chevron { color: var(--muted); transition: transform 0.25s; font-size: 0.8rem; }
+  .cat-chevron.open { transform: rotate(180deg); }
+
+  /* SPESE TABLE */
+  .spese-table-wrap { overflow-x: auto; }
+  .spese-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  .spese-table th {
+    background: var(--surface2);
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .spese-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .spese-table tr:last-child td { border-bottom: none; }
+  .spese-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .spesa-importo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    color: var(--accent2);
+    white-space: nowrap;
+  }
+  .spesa-date { color: var(--muted); white-space: nowrap; }
+  .spesa-fornitore { color: var(--muted); font-size: 0.82rem; }
+  .spesa-note { color: var(--muted); font-size: 0.8rem; font-style: italic; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .allegato-link {
+    color: var(--accent);
+    font-size: 0.8rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .allegato-link:hover { text-decoration: underline; }
+  .row-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s; }
+  .spese-table tr:hover .row-actions { opacity: 1; }
+  .row-btn {
+    width: 26px; height: 26px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    background: var(--surface2);
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .row-btn.del:hover { color: var(--danger); background: rgba(255,92,92,0.15); }
+  .row-btn.edit:hover { color: var(--accent); background: rgba(200,240,74,0.15); }
+  .empty-cat {
+    text-align: center;
+    padding: 28px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  /* MODALE */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .modal-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .form-control {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-control:focus { border-color: var(--accent); }
+  .form-control::placeholder { color: var(--muted); }
+  select.form-control { cursor: pointer; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .color-swatches {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .color-swatch {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .color-swatch.selected { border-color: #fff; transform: scale(1.15); }
+  .emoji-picker {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .emoji-opt {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .emoji-opt.selected,
+  .emoji-opt:hover { border-color: var(--accent); background: rgba(200,240,74,0.1); }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .file-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .file-chosen {
+    font-size: 0.8rem;
+    color: var(--muted);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* TOAST */
+  #toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .toast {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 0.85rem;
+    animation: toastIn 0.25s ease;
+    max-width: 320px;
+  }
+  .toast.error { border-left-color: var(--danger); }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  /* LOADING */
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 80px;
+    color: var(--muted);
+  }
+
+  /* UPLOAD AREA */
+  .upload-area {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .upload-area:hover { border-color: var(--accent); color: var(--accent); }
+  .upload-area.has-file { border-color: var(--accent); background: rgba(200,240,74,0.05); color: var(--accent); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    header { padding: 16px 20px; }
+    main { padding: 24px 20px; }
+    .form-row, .form-row-3 { grid-template-columns: 1fr; }
+    .project-main-title { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Spese<span>Pro</span></div>
+  <div class="breadcrumb" id="breadcrumb">
+    <span class="current">Progetti</span>
+  </div>
+  <div class="header-actions" id="headerActions">
+    <button class="btn btn-primary" onclick="openModal('newProject')">
+      + Nuovo Progetto
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- OVERVIEW -->
+  <div class="overview-view" id="overviewView">
+    <div class="section-header">
+      <div>
+        <div class="section-title">I tuoi Progetti</div>
+        <div class="section-subtitle" id="projectsSubtitle">Caricamento in corso…</div>
+      </div>
+    </div>
+    <div class="projects-grid" id="projectsGrid">
+      <div class="loading-state"><div class="spinner"></div><span>Caricamento progetti…</span></div>
+    </div>
+  </div>
+
+  <!-- DETAIL -->
+  <div class="detail-view" id="detailView">
+    <div class="project-header">
+      <div class="project-title-block">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="project-main-title" id="detailTitle">—</div>
+          <button class="btn btn-secondary btn-sm" style="flex-shrink:0" onclick="editProject(currentProject.id)" title="Modifica progetto">✏️ Modifica</button>
+        </div>
+        <div class="project-main-desc" id="detailDesc">—</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-shrink:0">
+        <button class="btn btn-secondary" onclick="openModal('newCategory')">+ Categoria</button>
+        <button class="btn btn-primary" onclick="openModal('newSpesa')">+ Spesa</button>
+      </div>
+    </div>
+
+    <div class="summary-pills" id="summaryPills"></div>
+    <div class="categories-container" id="categoriesContainer">
+      <div class="loading-state"><div class="spinner"></div><span>Caricamento spese…</span></div>
+    </div>
+  </div>
+</main>
+
+<!-- MODALI -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnOverlay(event)">
+  <!-- NUOVO PROGETTO -->
+  <div class="modal" id="modalNewProject" style="display:none">
+    <div class="modal-title">Nuovo Progetto</div>
+    <div class="form-group">
+      <label class="form-label">Nome progetto *</label>
+      <input type="text" class="form-control" id="npNome" placeholder="Es. Parco giochi Via Manzoni">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descrizione</label>
+      <input type="text" class="form-control" id="npDesc" placeholder="Breve descrizione…">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Budget (€)</label>
+      <input type="number" class="form-control" id="npBudget" placeholder="0.00" step="0.01">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Colore</label>
+      <div class="color-swatches" id="colorSwatches"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Annulla</button>
+      <button class="btn btn-primary" onclick="saveNewProject()">Crea Progetto</button>
+    </div>
+  </div>
+
+  <!-- NUOVA CATEGORIA -->
+  <div class="modal" id="modalNewCategory" style="display:none">
+    <div class="modal-title">Nuova Categoria</div>
+    <div class="form-group">
+      <label class="form-label">Nome categoria *</label>
+      <input type="text" class="form-control" id="ncNome" placeholder="Es. Materiali, Trasporti, Manodopera…">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Icona</label>
+      <div class="emoji-picker" id="emojiPicker"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Annulla</button>
+      <button class="btn btn-primary" onclick="saveNewCategory()">Crea Categoria</button>
+    </div>
+  </div>
+
+  <!-- NUOVA SPESA -->
+  <div class="modal" id="modalNewSpesa" style="display:none">
+    <div class="modal-title">Nuova Spesa</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Data *</label>
+        <input type="date" class="form-control" id="nsData">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Importo (€) *</label>
+        <input type="number" class="form-control" id="nsImporto" placeholder="0.00" step="0.01" min="0">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descrizione *</label>
+      <input type="text" class="form-control" id="nsDescrizione" placeholder="Cosa è stato acquistato/pagato…">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Categoria</label>
+        <select class="form-control" id="nsCategoria"><option value="">— Nessuna —</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fornitore / Pagato a</label>
+        <input type="text" class="form-control" id="nsFornitore" placeholder="Nome fornitore…">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Note</label>
+      <input type="text" class="form-control" id="nsNote" placeholder="Annotazioni aggiuntive…">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Allegato / Ricevuta</label>
+      <div class="upload-area" id="uploadArea" onclick="document.getElementById('nsFile').click()">
+        <div>📎 Clicca per allegare un file</div>
+        <div style="font-size:0.75rem;margin-top:4px;color:var(--muted)">PDF, immagini, max 5MB</div>
+      </div>
+      <input type="file" id="nsFile" style="display:none" accept="image/*,.pdf" onchange="handleFileChange()">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Annulla</button>
+      <button class="btn btn-primary" onclick="saveNewSpesa()">Salva Spesa</button>
+    </div>
+  </div>
+  <!-- MODIFICA PROGETTO -->
+  <div class="modal" id="modalEditProject" style="display:none">
+    <div class="modal-title">Modifica Progetto</div>
+    <div class="form-group">
+      <label class="form-label">Nome progetto *</label>
+      <input type="text" class="form-control" id="epNome" placeholder="Es. Parco giochi Via Manzoni">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descrizione</label>
+      <input type="text" class="form-control" id="epDesc" placeholder="Breve descrizione…">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Budget (€)</label>
+      <input type="number" class="form-control" id="epBudget" placeholder="0.00" step="0.01">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Colore</label>
+      <div class="color-swatches" id="colorSwatchesEdit"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Annulla</button>
+      <button class="btn btn-primary" onclick="saveEditProject()">Salva Modifiche</button>
+    </div>
+  </div>
+
+  <!-- MODIFICA SPESA -->
+  <div class="modal" id="modalEditSpesa" style="display:none">
+    <div class="modal-title">Modifica Spesa</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Data *</label>
+        <input type="date" class="form-control" id="esData">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Importo (€) *</label>
+        <input type="number" class="form-control" id="esImporto" placeholder="0.00" step="0.01" min="0">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descrizione *</label>
+      <input type="text" class="form-control" id="esDescrizione" placeholder="Cosa è stato acquistato/pagato…">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Categoria</label>
+        <select class="form-control" id="esCategoria"><option value="">— Nessuna —</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fornitore / Pagato a</label>
+        <input type="text" class="form-control" id="esFornitore" placeholder="Nome fornitore…">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Note</label>
+      <input type="text" class="form-control" id="esNote" placeholder="Annotazioni aggiuntive…">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Allegato / Ricevuta</label>
+      <div class="upload-area" id="uploadAreaEdit" onclick="document.getElementById('esFile').click()">
+        <div>📎 Clicca per allegare un file</div>
+        <div style="font-size:0.75rem;margin-top:4px;color:var(--muted)">PDF, immagini, max 5MB</div>
+      </div>
+      <input type="file" id="esFile" style="display:none" accept="image/*,.pdf" onchange="handleFileChangeEdit()">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Annulla</button>
+      <button class="btn btn-primary" onclick="saveEditSpesa()">Salva Modifiche</button>
+    </div>
+  </div>
+
+</div><!-- fine modal-overlay -->
+
+<div id="toast-container"></div>
+
+<script>
+// ─── SUPABASE CONFIG ───────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://mobefattfjxtmqgflzts.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vYmVmYXR0Zmp4dG1xZ2ZsenRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNzA2MTQsImV4cCI6MjA5Mzg0NjYxNH0.D7dwZDgcaKtDLaiq9YZJuWgHzHjHWK6HKI49AhJjImQ';
+
+const db = {
+  async query(table, options = {}) {
+    let url = `${SUPABASE_URL}/rest/v1/${table}?`;
+    if (options.select) url += `select=${encodeURIComponent(options.select)}&`;
+    if (options.filter) {
+      for (const [k, v] of Object.entries(options.filter)) {
+        url += `${k}=eq.${encodeURIComponent(v)}&`;
+      }
+    }
+    if (options.order) url += `order=${options.order}&`;
+    const res = await fetch(url, { headers: headers() });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
+  async insert(table, data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+      method: 'POST',
+      headers: { ...headers(), 'Prefer': 'return=representation' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
+  async update(table, id, data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { ...headers(), 'Prefer': 'return=representation' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
+  async delete(table, id) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: headers()
+    });
+    if (!res.ok) throw new Error(await res.text());
+  }
+};
+
+function headers() {
+  return {
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Content-Type': 'application/json'
+  };
+}
+
+// Upload allegato su Supabase Storage
+async function uploadAllegato(file) {
+  const ext = file.name.split('.').pop();
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const path = `allegati/${filename}`;
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/spese-allegati/${path}`, {
+    method: 'POST',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': file.type },
+    body: file
+  });
+  if (!res.ok) {
+    // fallback: store as base64 in data
+    return null;
+  }
+  return `${SUPABASE_URL}/storage/v1/object/public/spese-allegati/${path}`;
+}
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let currentProject = null;
+let allProjects = [];
+let projectCategories = [];
+let allSpeseCache = []; // cache per edit spesa
+let editingProjectId = null;
+let editingSpesaId = null;
+let selectedColor = '#c8f04a';
+let selectedColorEdit = '#c8f04a';
+let selectedEmoji = '📁';
+let selectedFile = null;
+let selectedFileEdit = null;
+const COLORS = ['#c8f04a','#4af0b4','#4ab4f0','#f04a9a','#f09a4a','#a04af0','#f04a4a','#4af04a'];
+const EMOJIS = ['📁','🏗️','🌿','🏠','🔧','⚡','🚛','💼','📦','🌳','🏢','💡','🔩','🎯','💰','📋'];
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+async function init() {
+  buildColorSwatches();
+  buildEmojiPicker();
+  setTodayDate();
+  await loadProjects();
+  // Crea bucket storage se non esiste (best-effort)
+  tryCreateBucket();
+}
+
+async function tryCreateBucket() {
+  try {
+    await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
+      method: 'POST',
+      headers: { ...headers() },
+      body: JSON.stringify({ id: 'spese-allegati', name: 'spese-allegati', public: true })
+    });
+  } catch(e) {}
+}
+
+function setTodayDate() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('nsData').value = today;
+}
+
+// ─── PROJECTS ─────────────────────────────────────────────────────────────────
+async function loadProjects() {
+  try {
+    const projects = await db.query('progetti', { order: 'created_at.desc' });
+    // Per ogni progetto, carica la somma spese
+    const spese = await db.query('spese', { select: 'progetto_id,importo' });
+    allProjects = projects.map(p => {
+      const tot = spese.filter(s => s.progetto_id === p.id).reduce((a, b) => a + parseFloat(b.importo || 0), 0);
+      const cnt = spese.filter(s => s.progetto_id === p.id).length;
+      return { ...p, totale: tot, numero_spese: cnt };
+    });
+    renderProjects();
+  } catch(e) {
+    toast('Errore nel caricamento progetti: ' + e.message, true);
+    document.getElementById('projectsGrid').innerHTML = `<div class="loading-state" style="color:var(--danger)">⚠️ Errore di connessione</div>`;
+  }
+}
+
+function renderProjects() {
+  const grid = document.getElementById('projectsGrid');
+  const subtitle = document.getElementById('projectsSubtitle');
+  const tot = allProjects.reduce((a, b) => a + b.totale, 0);
+  subtitle.textContent = `${allProjects.length} project${allProjects.length !== 1 ? 'i' : 'o'} · Totale generale: ${formatEuro(tot)}`;
+
+  let html = '';
+  for (const p of allProjects) {
+    const col = p.colore || '#c8f04a';
+    html += `
+      <div class="project-card" style="--card-color:${col}" onclick="openProject('${p.id}')">
+        <div class="card-actions">
+          <button class="card-action-btn edit" onclick="event.stopPropagation();editProject('${p.id}')" title="Modifica">✏️</button>
+          <button class="card-action-btn" onclick="event.stopPropagation();deleteProject('${p.id}','${escHtml(p.nome)}')" title="Elimina">🗑</button>
+        </div>
+        <div class="card-icon">${p.budget ? '💼' : '📁'}</div>
+        <div class="card-name">${escHtml(p.nome)}</div>
+        <div class="card-desc">${escHtml(p.descrizione || '')}</div>
+        <div class="card-stats">
+          <div>
+            <div class="card-total-label">Spese totali</div>
+            <div class="card-total-value">${formatEuro(p.totale)}</div>
+          </div>
+          <div class="card-count">${p.numero_spese} spese${p.budget ? '<br>Budget: ' + formatEuro(p.budget) : ''}</div>
+        </div>
+      </div>`;
+  }
+  html += `<div class="add-project-card" onclick="openModal('newProject')">
+    <div class="plus">＋</div>
+    <span>Nuovo Progetto</span>
+  </div>`;
+  grid.innerHTML = html;
+}
+
+async function openProject(id) {
+  currentProject = allProjects.find(p => p.id === id);
+  if (!currentProject) return;
+
+  document.getElementById('overviewView').classList.add('hidden');
+  document.getElementById('detailView').classList.add('active');
+  document.getElementById('detailTitle').textContent = currentProject.nome;
+  document.getElementById('detailDesc').textContent = currentProject.descrizione || '';
+
+  // Breadcrumb
+  document.getElementById('breadcrumb').innerHTML = `
+    <span class="crumb" onclick="backToOverview()">Progetti</span>
+    <span class="sep">›</span>
+    <span class="current">${escHtml(currentProject.nome)}</span>`;
+
+  // Header actions
+  document.getElementById('headerActions').innerHTML = `
+    <button class="btn btn-secondary" onclick="openModal('newCategory')">+ Categoria</button>
+    <button class="btn btn-primary" onclick="openModal('newSpesa')">+ Spesa</button>`;
+
+  await loadProjectDetail();
+}
+
+async function loadProjectDetail() {
+  document.getElementById('categoriesContainer').innerHTML = `<div class="loading-state"><div class="spinner"></div><span>Caricamento…</span></div>`;
+  try {
+    const [categorie, spese] = await Promise.all([
+      db.query('categorie', { filter: { progetto_id: currentProject.id }, order: 'created_at.asc' }),
+      db.query('spese', { filter: { progetto_id: currentProject.id }, order: 'data.desc' })
+    ]);
+    projectCategories = categorie;
+    allSpeseCache = spese;
+    renderDetail(categorie, spese);
+  } catch(e) {
+    toast('Errore caricamento: ' + e.message, true);
+  }
+}
+
+function renderDetail(categorie, spese) {
+  // Summary pills
+  const totale = spese.reduce((a, b) => a + parseFloat(b.importo || 0), 0);
+  const budget = currentProject.budget;
+  let pillsHtml = `
+    <div class="pill"><span class="pill-label">Totale spese</span><span class="pill-value accent">${formatEuro(totale)}</span></div>
+    <div class="pill"><span class="pill-label">N. spese</span><span class="pill-value">${spese.length}</span></div>
+    <div class="pill"><span class="pill-label">Categorie</span><span class="pill-value">${categorie.length}</span></div>`;
+  if (budget) {
+    const rimanente = parseFloat(budget) - totale;
+    pillsHtml += `<div class="pill"><span class="pill-label">Budget</span><span class="pill-value">${formatEuro(budget)}</span></div>
+    <div class="pill"><span class="pill-label">Rimanente</span><span class="pill-value" style="color:${rimanente >= 0 ? 'var(--accent)' : 'var(--danger)'}">${formatEuro(rimanente)}</span></div>`;
+  }
+  document.getElementById('summaryPills').innerHTML = pillsHtml;
+
+  // Spese senza categoria
+  const speseNocat = spese.filter(s => !s.categoria_id);
+
+  let html = '';
+  for (const cat of categorie) {
+    const catSpese = spese.filter(s => s.categoria_id === cat.id);
+    const catTot = catSpese.reduce((a, b) => a + parseFloat(b.importo || 0), 0);
+    html += `
+      <div class="category-section">
+        <div class="category-header" onclick="toggleCat('cat-${cat.id}')">
+          <div class="category-name-group">
+            <span class="cat-icon">${cat.icona || '📁'}</span>
+            <span class="cat-name">${escHtml(cat.nome)}</span>
+            <span class="cat-count">${catSpese.length} spese</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="cat-total">${formatEuro(catTot)}</span>
+            <span class="cat-chevron" id="chev-cat-${cat.id}">▼</span>
+          </div>
+        </div>
+        <div id="cat-${cat.id}">
+          ${renderSpeseTable(catSpese)}
+        </div>
+      </div>`;
+  }
+
+  // Sezione non categorizzate
+  if (speseNocat.length > 0) {
+    const nocatTot = speseNocat.reduce((a, b) => a + parseFloat(b.importo || 0), 0);
+    html += `
+      <div class="category-section">
+        <div class="category-header" onclick="toggleCat('cat-nocat')">
+          <div class="category-name-group">
+            <span class="cat-icon">❓</span>
+            <span class="cat-name">Non categorizzate</span>
+            <span class="cat-count">${speseNocat.length} spese</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="cat-total">${formatEuro(nocatTot)}</span>
+            <span class="cat-chevron" id="chev-cat-nocat">▼</span>
+          </div>
+        </div>
+        <div id="cat-nocat">
+          ${renderSpeseTable(speseNocat)}
+        </div>
+      </div>`;
+  }
+
+  if (html === '') {
+    html = `<div style="text-align:center;padding:60px;color:var(--muted)">
+      <div style="font-size:2.5rem;margin-bottom:12px">📋</div>
+      <div style="font-size:1rem;font-weight:600;margin-bottom:6px">Nessuna categoria ancora</div>
+      <div style="font-size:0.85rem">Crea una categoria e aggiungi le prime spese</div>
+    </div>`;
+  }
+
+  document.getElementById('categoriesContainer').innerHTML = html;
+}
+
+function renderSpeseTable(spese) {
+  if (spese.length === 0) return `<div class="empty-cat">Nessuna spesa in questa categoria</div>`;
+  let rows = '';
+  for (const s of spese) {
+    rows += `<tr>
+      <td class="spesa-date">${formatDate(s.data)}</td>
+      <td>${escHtml(s.descrizione)}</td>
+      <td class="spesa-importo">${formatEuro(s.importo)}</td>
+      <td class="spesa-fornitore">${escHtml(s.fornitore || '—')}</td>
+      <td class="spesa-note" title="${escHtml(s.note || '')}">${escHtml(s.note || '')}</td>
+      <td>${s.allegato_url ? `<a class="allegato-link" href="${s.allegato_url}" target="_blank">📎 ${escHtml(s.allegato_nome || 'File')}</a>` : '<span style="color:var(--muted);font-size:0.8rem">—</span>'}</td>
+      <td><div class="row-actions"><button class="row-btn edit" onclick="editSpesa('${s.id}')" title="Modifica">✏️</button><button class="row-btn del" onclick="deleteSpesa('${s.id}')" title="Elimina">🗑</button></div></td>
+    </tr>`;
+  }
+  return `<div class="spese-table-wrap"><table class="spese-table">
+    <thead><tr>
+      <th>Data</th><th>Descrizione</th><th>Importo</th><th>Fornitore</th><th>Note</th><th>Allegato</th><th></th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+}
+
+function toggleCat(id) {
+  const el = document.getElementById(id);
+  const chev = document.getElementById('chev-' + id);
+  if (el.style.display === 'none') {
+    el.style.display = '';
+    if (chev) { chev.classList.remove('open'); }
+  } else {
+    el.style.display = 'none';
+    if (chev) { chev.classList.add('open'); }
+  }
+}
+
+function backToOverview() {
+  currentProject = null;
+  document.getElementById('overviewView').classList.remove('hidden');
+  document.getElementById('detailView').classList.remove('active');
+  document.getElementById('breadcrumb').innerHTML = `<span class="current">Progetti</span>`;
+  document.getElementById('headerActions').innerHTML = `<button class="btn btn-primary" onclick="openModal('newProject')">+ Nuovo Progetto</button>`;
+  loadProjects();
+}
+
+// ─── CRUD ─────────────────────────────────────────────────────────────────────
+async function saveNewProject() {
+  const nome = document.getElementById('npNome').value.trim();
+  const desc = document.getElementById('npDesc').value.trim();
+  const budget = document.getElementById('npBudget').value;
+  if (!nome) { toast('Inserisci il nome del progetto', true); return; }
+  try {
+    await db.insert('progetti', { nome, descrizione: desc || null, colore: selectedColor, budget: budget ? parseFloat(budget) : null });
+    toast('Progetto creato!');
+    closeModal();
+    await loadProjects();
+  } catch(e) { toast('Errore: ' + e.message, true); }
+}
+
+async function saveNewCategory() {
+  const nome = document.getElementById('ncNome').value.trim();
+  if (!nome) { toast('Inserisci il nome della categoria', true); return; }
+  if (!currentProject) { toast('Nessun progetto selezionato', true); return; }
+  try {
+    await db.insert('categorie', { progetto_id: currentProject.id, nome, icona: selectedEmoji });
+    toast('Categoria creata!');
+    closeModal();
+    await loadProjectDetail();
+  } catch(e) { toast('Errore: ' + e.message, true); }
+}
+
+async function saveNewSpesa() {
+  const data = document.getElementById('nsData').value;
+  const importo = document.getElementById('nsImporto').value;
+  const descrizione = document.getElementById('nsDescrizione').value.trim();
+  const categoria_id = document.getElementById('nsCategoria').value || null;
+  const fornitore = document.getElementById('nsFornitore').value.trim();
+  const note = document.getElementById('nsNote').value.trim();
+
+  if (!data || !importo || !descrizione) { toast('Compila i campi obbligatori (Data, Importo, Descrizione)', true); return; }
+  if (!currentProject) return;
+
+  let allegato_url = null;
+  let allegato_nome = null;
+  if (selectedFile) {
+    try {
+      allegato_url = await uploadAllegato(selectedFile);
+      allegato_nome = selectedFile.name;
+    } catch(e) { /* best effort */ }
+  }
+
+  try {
+    await db.insert('spese', {
+      progetto_id: currentProject.id,
+      categoria_id,
+      data, importo: parseFloat(importo), descrizione,
+      fornitore: fornitore || null,
+      note: note || null,
+      allegato_url, allegato_nome
+    });
+    toast('Spesa salvata!');
+    closeModal();
+    await loadProjectDetail();
+    await loadProjects(); // aggiorna totali card
+  } catch(e) { toast('Errore: ' + e.message, true); }
+}
+
+async function deleteSpesa(id) {
+  if (!confirm('Eliminare questa spesa?')) return;
+  try {
+    await db.delete('spese', id);
+    toast('Spesa eliminata');
+    await loadProjectDetail();
+  } catch(e) { toast('Errore: ' + e.message, true); }
+}
+
+async function deleteProject(id, nome) {
+  if (!confirm(`Eliminare il progetto "${nome}" e tutte le sue spese?`)) return;
+  try {
+    await db.delete('progetti', id);
+    toast('Progetto eliminato');
+    await loadProjects();
+  } catch(e) { toast('Errore: ' + e.message, true); }
+}
+
+// ─── MODALI ───────────────────────────────────────────────────────────────────
+function openModal(type) {
+  document.getElementById('modalOverlay').classList.add('active');
+  document.getElementById('modalNewProject').style.display = 'none';
+  document.getElementById('modalNewCategory').style.display = 'none';
+  document.getElementById('modalNewSpesa').style.display = 'none';
+  document.getElementById('modalEditProject').style.display = 'none';
+  document.getElementById('modalEditSpesa').style.display = 'none';
+
+  if (type === 'newProject') {
+    document.getElementById('modalNewProject').style.display = 'block';
+    document.getElementById('npNome').value = '';
+    document.getElementById('npDesc').value = '';
+    document.getElementById('npBudget').value = '';
+    selectedColor = COLORS[0];
+    refreshColorSwatches();
+    setTimeout(() => document.getElementById('npNome').focus(), 100);
+  } else if (type === 'newCategory') {
+    document.getElementById('modalNewCategory').style.display = 'block';
+    document.getElementById('ncNome').value = '';
+    selectedEmoji = EMOJIS[0];
+    refreshEmojiPicker();
+    setTimeout(() => document.getElementById('ncNome').focus(), 100);
+  } else if (type === 'newSpesa') {
+    document.getElementById('modalNewSpesa').style.display = 'block';
+    setTodayDate();
+    document.getElementById('nsImporto').value = '';
+    document.getElementById('nsDescrizione').value = '';
+    document.getElementById('nsFornitore').value = '';
+    document.getElementById('nsNote').value = '';
+    document.getElementById('nsFile').value = '';
+    document.getElementById('uploadArea').innerHTML = `<div>📎 Clicca per allegare un file</div><div style="font-size:0.75rem;margin-top:4px;color:var(--muted)">PDF, immagini, max 5MB</div>`;
+    document.getElementById('uploadArea').classList.remove('has-file');
+    selectedFile = null;
+    // Popola categorie
+    const sel = document.getElementById('nsCategoria');
+    sel.innerHTML = '<option value="">— Nessuna —</option>';
+    for (const c of projectCategories) {
+      sel.innerHTML += `<option value="${c.id}">${c.icona} ${escHtml(c.nome)}</option>`;
+    }
+  }
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+}
+
+function closeModalOnOverlay(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+// ─── EDIT FUNCTIONS ───────────────────────────────────────────────────────────
+function editProject(id) {
+  const p = allProjects.find(x => x.id === id);
+  if (!p) return;
+  editingProjectId = id;
+  document.getElementById('modalOverlay').classList.add('active');
+  document.getElementById('modalNewProject').style.display = 'none';
+  document.getElementById('modalNewCategory').style.display = 'none';
+  document.getElementById('modalNewSpesa').style.display = 'none';
+  document.getElementById('modalEditSpesa').style.display = 'none';
+  document.getElementById('modalEditProject').style.display = 'block';
+
+  document.getElementById('epNome').value = p.nome || '';
+  document.getElementById('epDesc').value = p.descrizione || '';
+  document.getElementById('epBudget').value = p.budget || '';
+  selectedColorEdit = p.colore || COLORS[0];
+  buildColorSwatchesEdit();
+  setTimeout(() => document.getElementById('epNome').focus(), 100);
+}
+
+async function saveEditProject() {
+  const nome = document.getElementById('epNome').value.trim();
+  const desc = document.getElementById('epDesc').value.trim();
+  const budget = document.getElementById('epBudget').value;
+  if (!nome) { toast('Inserisci il nome del progetto', true); return; }
+  try {
+    await db.update('progetti', editingProjectId, { nome, descrizione: desc || null, colore: selectedColorEdit, budget: budget ? parseFloat(budget) : null });
+    toast('Progetto aggiornato!');
+    closeModal();
+    // Aggiorna currentProject se siamo nel dettaglio
+    if (currentProject && currentProject.id === editingProjectId) {
+      currentProject.nome = nome;
+      currentProject.descrizione = desc;
+      currentProject.budget = budget ? parseFloat(budget) : null;
+      document.getElementById('detailTitle').textContent = nome;
+      document.getElementById('detailDesc').textContent = desc;
+      document.getElementById('breadcrumb').innerHTML = `
+        <span class="crumb" onclick="backToOverview()">Progetti</span>
+        <span class="sep">›</span>
+        <span class="current">${escHtml(nome)}</span>`;
+      await loadProjectDetail();
+    }
+    await loadProjects();
+  } catch(e) { toast('Errore: ' + e.message, true); }
+}
+
+function editSpesa(id) {
+  const s = allSpeseCache.find(x => x.id === id);
+  if (!s) return;
+  editingSpesaId = id;
+  document.getElementById('modalOverlay').classList.add('active');
+  document.getElementById('modalNewProject').style.display = 'none';
+  document.getElementById('modalNewCategory').style.display = 'none';
+  document.getElementById('modalNewSpesa').style.display = 'none';
+  document.getElementById('modalEditProject').style.display = 'none';
+  document.getElementById('modalEditSpesa').style.display = 'block';
+
+  document.getElementById('esData').value = s.data || '';
+  document.getElementById('esImporto').value = s.importo || '';
+  document.getElementById('esDescrizione').value = s.descrizione || '';
+  document.getElementById('esFornitore').value = s.fornitore || '';
+  document.getElementById('esNote').value = s.note || '';
+  selectedFileEdit = null;
+  document.getElementById('esFile').value = '';
+
+  // Allegato esistente
+  const area = document.getElementById('uploadAreaEdit');
+  if (s.allegato_url) {
+    area.classList.add('has-file');
+    area.innerHTML = `<div>📎 ${escHtml(s.allegato_nome || 'File allegato')}</div><div style="font-size:0.75rem;margin-top:4px;color:var(--muted)">Clicca per sostituire</div>`;
+  } else {
+    area.classList.remove('has-file');
+    area.innerHTML = `<div>📎 Clicca per allegare un file</div><div style="font-size:0.75rem;margin-top:4px;color:var(--muted)">PDF, immagini, max 5MB</div>`;
+  }
+
+  // Popola categorie
+  const sel = document.getElementById('esCategoria');
+  sel.innerHTML = '<option value="">— Nessuna —</option>';
+  for (const c of projectCategories) {
+    sel.innerHTML += `<option value="${c.id}"${s.categoria_id === c.id ? ' selected' : ''}>${c.icona} ${escHtml(c.nome)}</option>`;
+  }
+}
+
+async function saveEditSpesa() {
+  const data = document.getElementById('esData').value;
+  const importo = document.getElementById('esImporto').value;
+  const descrizione = document.getElementById('esDescrizione').value.trim();
+  const categoria_id = document.getElementById('esCategoria').value || null;
+  const fornitore = document.getElementById('esFornitore').value.trim();
+  const note = document.getElementById('esNote').value.trim();
+  if (!data || !importo || !descrizione) { toast('Compila i campi obbligatori', true); return; }
+
+  const existing = allSpeseCache.find(x => x.id === editingSpesaId);
+  let allegato_url = existing ? existing.allegato_url : null;
+  let allegato_nome = existing ? existing.allegato_nome : null;
+
+  if (selectedFileEdit) {
+    try {
+      const newUrl = await uploadAllegato(selectedFileEdit);
+      if (newUrl) { allegato_url = newUrl; allegato_nome = selectedFileEdit.name; }
+    } catch(e) {}
+  }
+
+  try {
+    await db.update('spese', editingSpesaId, {
+      data, importo: parseFloat(importo), descrizione,
+      categoria_id, fornitore: fornitore || null,
+      note: note || null, allegato_url, allegato_nome
+    });
+    toast('Spesa aggiornata!');
+    closeModal();
+    await loadProjectDetail();
+    await loadProjects();
+  } catch(e) { toast('Errore: ' + e.message, true); }
+}
+
+function handleFileChangeEdit() {
+  const file = document.getElementById('esFile').files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { toast('File troppo grande (max 5MB)', true); return; }
+  selectedFileEdit = file;
+  const area = document.getElementById('uploadAreaEdit');
+  area.classList.add('has-file');
+  area.innerHTML = `<div>✅ ${escHtml(file.name)}</div><div style="font-size:0.75rem;margin-top:4px">${(file.size/1024).toFixed(0)} KB</div>`;
+}
+
+function buildColorSwatchesEdit() {
+  const wrap = document.getElementById('colorSwatchesEdit');
+  wrap.innerHTML = COLORS.map(c => `<div class="color-swatch${c === selectedColorEdit ? ' selected' : ''}" style="background:${c}" onclick="selectColorEdit('${c}')"></div>`).join('');
+}
+function selectColorEdit(c) {
+  selectedColorEdit = c;
+  document.querySelectorAll('#colorSwatchesEdit .color-swatch').forEach(el => {
+    el.classList.toggle('selected', el.style.background === c || el.style.backgroundColor === c);
+  });
+}
+
+
+function handleFileChange() {
+  const file = document.getElementById('nsFile').files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { toast('File troppo grande (max 5MB)', true); return; }
+  selectedFile = file;
+  const area = document.getElementById('uploadArea');
+  area.classList.add('has-file');
+  area.innerHTML = `<div>✅ ${escHtml(file.name)}</div><div style="font-size:0.75rem;margin-top:4px">${(file.size/1024).toFixed(0)} KB</div>`;
+}
+
+// ─── UI HELPERS ───────────────────────────────────────────────────────────────
+function buildColorSwatches() {
+  const wrap = document.getElementById('colorSwatches');
+  wrap.innerHTML = COLORS.map(c => `<div class="color-swatch${c === selectedColor ? ' selected' : ''}" style="background:${c}" onclick="selectColor('${c}')"></div>`).join('');
+}
+function refreshColorSwatches() {
+  document.querySelectorAll('.color-swatch').forEach(el => {
+    el.classList.toggle('selected', el.style.background === selectedColor || el.style.backgroundColor === selectedColor);
+  });
+}
+function selectColor(c) {
+  selectedColor = c;
+  refreshColorSwatches();
+}
+
+function buildEmojiPicker() {
+  const wrap = document.getElementById('emojiPicker');
+  wrap.innerHTML = EMOJIS.map(e => `<div class="emoji-opt${e === selectedEmoji ? ' selected' : ''}" onclick="selectEmoji('${e}')">${e}</div>`).join('');
+}
+function refreshEmojiPicker() {
+  document.querySelectorAll('.emoji-opt').forEach(el => {
+    el.classList.toggle('selected', el.textContent === selectedEmoji);
+  });
+}
+function selectEmoji(e) {
+  selectedEmoji = e;
+  refreshEmojiPicker();
+}
+
+function formatEuro(val) {
+  return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(val || 0);
+}
+function formatDate(d) {
+  if (!d) return '—';
+  const [y, m, g] = d.split('-');
+  return `${g}/${m}/${y}`;
+}
+function escHtml(str) {
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function toast(msg, isError = false) {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// Keyboard shortcut
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+init();
+</script>
+</body>
+</html>
