@@ -817,7 +817,7 @@ function renderProject(){
 
   cats.forEach((c,i)=>{
     const listOut=filtered.filter(s=>s.categoria_id===c.id && !isIn(s));
-    const listIn=inOf(all).filter(s=>{
+    const listIn=entrate.filter(s=>{
       if(s.categoria_id!==c.id)return false;
       if(state.onlyUnpaid)return false;
       if(!q)return true;
