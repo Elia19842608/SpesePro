@@ -656,6 +656,7 @@ function renderHome(){
   const tot=sum(usc), totIn=sum(ent), saldo=totIn-tot;
   const m=todayISO().slice(0,7);
   const mese=sum(usc.filter(s=>(s.data||'').startsWith(m)));
+  const meseIn=sum(ent.filter(s=>(s.data||'').startsWith(m)));
   const daPagare=sum(usc.filter(s=>s.pagato===false));
   document.getElementById('homeSub').textContent=
     `${active.length} attiv${active.length===1?'o':'i'} · ${allSp.length} movimenti registrati`;
@@ -664,6 +665,7 @@ function renderHome(){
     ${totIn>0?`<div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Entrate</div><div class="stat-val sm in">${eur(totIn)}</div></div>
     <div class="stat"><div class="stat-lbl">Saldo</div><div class="stat-val sm ${saldo>=0?'saldo-pos':'saldo-neg'}">${eur(saldo)}</div></div>`:''}
     <div class="stat" style="--accent-c:var(--terra-soft)"><div class="stat-lbl">Uscite questo mese</div><div class="stat-val sm">${eur(mese)}</div></div>
+    ${meseIn>0?`<div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Entrate questo mese</div><div class="stat-val sm in">${eur(meseIn)}</div></div>`:''}
     <div class="stat"><div class="stat-lbl">Progetti attivi</div><div class="stat-val">${active.length}</div>
       ${state.projects.length>active.length?`<div class="stat-hint">+${state.projects.length-active.length} archiviati</div>`:''}</div>
     ${daPagare>0?`<div class="stat" style="--accent-c:#f8eed8"><div class="stat-lbl">Da pagare</div><div class="stat-val sm danger">${eur(daPagare)}</div></div>`:''}`;
@@ -760,7 +762,7 @@ function renderProject(){
   const tot=sum(all), totIn=sum(entrate), saldo=totIn-tot;
   const bud=parseFloat(p.budget||0), unpaid=sum(all.filter(s=>s.pagato===false));
   const avg=all.length?tot/all.length:0;
-  const m=todayISO().slice(0,7), mese=sum(all.filter(s=>(s.data||'').startsWith(m)));
+  const m=todayISO().slice(0,7), mese=sum(all.filter(s=>(s.data||'').startsWith(m))), meseIn=sum(entrate.filter(s=>(s.data||'').startsWith(m)));
   const rim=bud-tot;
   document.getElementById('pStats').innerHTML=`
     <div class="stat"><div class="stat-lbl">Uscite</div><div class="stat-val">${eur(tot)}</div>
@@ -776,6 +778,7 @@ function renderProject(){
       <div class="stat-val sm ${rim>=0?'ok':'danger'}">${eur(Math.abs(rim))}</div>
       <div class="stat-hint">${bud>0?Math.round(tot/bud*100):0}% utilizzato</div></div>`:''}
     <div class="stat" style="--accent-c:var(--terra-soft)"><div class="stat-lbl">Uscite questo mese</div><div class="stat-val sm">${eur(mese)}</div></div>
+    ${meseIn>0?`<div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Entrate questo mese</div><div class="stat-val sm in">${eur(meseIn)}</div></div>`:''}
     ${unpaid>0?`<div class="stat" style="--accent-c:#f8eed8"><div class="stat-lbl">Da pagare</div><div class="stat-val sm danger">${eur(unpaid)}</div></div>`:''}`;
 
   // chart per categoria
@@ -812,54 +815,67 @@ function renderProject(){
   }
   let h='';
 
-  // ── ENTRATE ──
-  const entFilt=entrate.filter(s=>{
-    if(state.onlyUnpaid)return false;
-    if(!q)return true;
-    return [s.descrizione,s.fornitore,s.note,s.metodo_pagamento].some(v=>(v||'').toLowerCase().includes(q));
-  }).sort((a,b)=>sortFn(a,b,sort));
-  if(entFilt.length){
-    const cl=state.collapsed.has('ent');
-    h+=`<div class="cat entrate">
-      <div class="cat-hd" onclick="toggleCat('ent')">
-        <div class="cat-ic" style="--cc:var(--sage-soft)">💰</div>
-        <div class="cat-txt"><div class="cat-nm">Entrate</div>
-        <div class="cat-sub"><span>${entrate.length} movimenti</span></div></div>
-        <div class="cat-rt"><span class="cat-tot">+ ${eur(totIn)}</span><span class="chev ${cl?'cl':''}">▼</span></div>
-      </div>
-      <div class="cat-body" style="${cl?'display:none':''}">${rowsHTML(entFilt)}</div></div>`;
-  }
   cats.forEach((c,i)=>{
-    const list=filtered.filter(s=>s.categoria_id===c.id);
-    const allList=all.filter(s=>s.categoria_id===c.id);
-    if((q||state.onlyUnpaid)&&!list.length)return;
-    const t=sum(allList), cb=parseFloat(c.budget||0), col=COLORS[i%COLORS.length];
+    const listOut=filtered.filter(s=>s.categoria_id===c.id && !isIn(s));
+    const listIn=inOf(all).filter(s=>{
+      if(s.categoria_id!==c.id)return false;
+      if(state.onlyUnpaid)return false;
+      if(!q)return true;
+      return [s.descrizione,s.fornitore,s.note,s.metodo_pagamento].some(v=>(v||'').toLowerCase().includes(q));
+    }).sort((a,b)=>sortFn(a,b,sort));
+    const allOut=all.filter(s=>s.categoria_id===c.id);
+    const allIn=entrate.filter(s=>s.categoria_id===c.id);
+    if((q||state.onlyUnpaid)&&!listOut.length&&!listIn.length)return;
+    if(!allOut.length&&!allIn.length)return;
+
+    const t=sum(allOut), tIn=sum(allIn), cb=parseFloat(c.budget||0), col=COLORS[i%COLORS.length];
     const cl=state.collapsed.has(c.id);
+    const netTot = tIn>0 ? `${t>0?eur(t):''}${t>0&&tIn>0?' · ':''}${tIn>0?'<span style="color:var(--sage-deep)">+ '+eur(tIn)+'</span>':''}` : eur(t);
     h+=`<div class="cat">
       <div class="cat-hd" onclick="toggleCat('${c.id}')">
         <div class="cat-ic" style="--cc:${col}33">${c.icona||'📁'}</div>
         <div class="cat-txt">
           <div class="cat-nm">${esc(c.nome)}</div>
-          <div class="cat-sub"><span>${allList.length} spese</span>${cb>0?`<span>· budget ${eurc(cb)}</span>`:''}
+          <div class="cat-sub"><span>${allOut.length} uscite${allIn.length?` · ${allIn.length} entrate`:''}</span>${cb>0?`<span>· budget ${eurc(cb)}</span>`:''}
           ${cb>0&&t>cb?`<span class="tag danger">sforato</span>`:''}</div>
         </div>
         <div class="cat-rt">
-          <span class="cat-tot">${eur(t)}</span>
+          <span class="cat-tot">${netTot}</span>
           <button class="mini-btn" onclick="event.stopPropagation();openEditCat('${c.id}')">✏️</button>
           <span class="chev ${cl?'cl':''}">▼</span>
         </div>
       </div>
       ${cb>0?`<div class="cat-prog"><div class="prog"><div class="prog-fill ${t>cb?'over':(t/cb>.85?'warn':'')}" style="width:${Math.min(100,t/cb*100)}%"></div></div></div>`:''}
-      <div class="cat-body" style="${cl?'display:none':''}">${rowsHTML(list)}</div>
+      <div class="cat-body" style="${cl?'display:none':''}">${rowsHTML([...listIn,...listOut])}</div>
     </div>`;
   });
+
+  // ── Entrate senza categoria ──
+  const entNoCat=entrate.filter(s=>{
+    if(s.categoria_id)return false;
+    if(state.onlyUnpaid)return false;
+    if(!q)return true;
+    return [s.descrizione,s.fornitore,s.note,s.metodo_pagamento].some(v=>(v||'').toLowerCase().includes(q));
+  }).sort((a,b)=>sortFn(a,b,sort));
+  const allEntNoCat=entrate.filter(s=>!s.categoria_id);
+  if(entNoCat.length){
+    const cl=state.collapsed.has('ent');
+    h+=`<div class="cat entrate">
+      <div class="cat-hd" onclick="toggleCat('ent')">
+        <div class="cat-ic" style="--cc:var(--sage-soft)">💰</div>
+        <div class="cat-txt"><div class="cat-nm">Entrate senza categoria</div>
+        <div class="cat-sub"><span>${allEntNoCat.length} movimenti</span></div></div>
+        <div class="cat-rt"><span class="cat-tot">+ ${eur(sum(allEntNoCat))}</span><span class="chev ${cl?'cl':''}">▼</span></div>
+      </div>
+      <div class="cat-body" style="${cl?'display:none':''}">${rowsHTML(entNoCat)}</div></div>`;
+  }
   const nocat=filtered.filter(s=>!s.categoria_id);
   if(nocat.length){
     const cl=state.collapsed.has('nc');
     h+=`<div class="cat">
       <div class="cat-hd" onclick="toggleCat('nc')">
         <div class="cat-ic" style="--cc:#e2ddd2">❓</div>
-        <div class="cat-txt"><div class="cat-nm">Senza categoria</div>
+        <div class="cat-txt"><div class="cat-nm">Uscite senza categoria</div>
         <div class="cat-sub"><span>${nocat.length} spese</span></div></div>
         <div class="cat-rt"><span class="cat-tot">${eur(sum(all.filter(s=>!s.categoria_id)))}</span><span class="chev ${cl?'cl':''}">▼</span></div>
       </div>
