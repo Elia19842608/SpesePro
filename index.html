@@ -322,6 +322,23 @@ select.fc{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='
 .saldo-pos{color:var(--sage-deep)}
 .saldo-neg{color:var(--danger)}
 
+/* ══ TABELLA RIEPILOGO ══ */
+.tb-wrap{overflow-x:auto}
+.tb{width:100%;border-collapse:collapse;font-size:.86rem}
+.tb th{text-align:left;font-size:.66rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:500;padding:13px 14px;background:var(--surface2);border-bottom:1px solid var(--border-soft);white-space:nowrap}
+.tb td{padding:13px 14px;border-bottom:1px solid var(--border-soft);white-space:nowrap}
+.tb tbody tr{cursor:pointer;transition:.15s}
+.tb tbody tr:hover{background:var(--surface2)}
+.tb .num{text-align:right;font-family:Fraunces,serif;font-weight:600;letter-spacing:-.3px}
+.tb .num.in{color:var(--sage-deep)}
+.tb tfoot td{font-weight:700;background:var(--surface2);border-bottom:none}
+.tb tfoot td:first-child{font-family:Fraunces,serif;font-style:italic}
+.tb-ic{margin-right:8px}
+.pcard-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-items:start}
+.pc-v{font-family:Fraunces,serif;font-size:1rem;font-weight:600;letter-spacing:-.4px;margin-top:2px;white-space:nowrap}
+.pc-v.in{color:var(--sage-deep)}
+@media(max-width:420px){.tb{font-size:.8rem}.tb th,.tb td{padding:11px 9px}.pc-v{font-size:.9rem}}
+
 /* ══ TOAST ══ */
 #toasts{position:fixed;bottom:calc(18px + var(--safe-b));left:16px;right:16px;z-index:999;
   display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
@@ -480,6 +497,8 @@ select.fc{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='
       <div class="fg"><label class="fl">Importo € *</label><input class="fc" id="sfImporto" type="number" step="0.01" inputmode="decimal" placeholder="0,00"></div>
     </div>
     <div class="fg"><label class="fl">Descrizione *</label><input class="fc" id="sfDesc" placeholder="Cosa hai pagato…"></div>
+    <div class="fg" id="sfProjWrap" style="display:none"><label class="fl">Progetto</label>
+      <select class="fc" id="sfProj" onchange="fillCatSelect(null,this.value)"></select></div>
     <div class="f2">
       <div class="fg"><label class="fl">Categoria</label><select class="fc" id="sfCat"></select></div>
       <div class="fg"><label class="fl" id="sfFornL">Fornitore</label><input class="fc" id="sfForn" placeholder="Pagato a…"></div>
@@ -653,28 +672,41 @@ function renderHome(){
   // stats
   const allSp=state.spese.filter(s=>active.some(p=>p.id===s.progetto_id));
   const usc=outOf(allSp), ent=inOf(allSp);
-  const tot=sum(usc), totIn=sum(ent), saldo=totIn-tot;
+  const tot=sum(usc), totIn=sum(ent);
   const m=todayISO().slice(0,7);
   const mese=sum(usc.filter(s=>(s.data||'').startsWith(m)));
   const meseIn=sum(ent.filter(s=>(s.data||'').startsWith(m)));
-  const daPagare=sum(usc.filter(s=>s.pagato===false));
   document.getElementById('homeSub').textContent=
     `${active.length} attiv${active.length===1?'o':'i'} · ${allSp.length} movimenti registrati`;
   document.getElementById('homeStats').innerHTML=`
-    <div class="stat"><div class="stat-lbl">Uscite totali</div><div class="stat-val">${eur(tot)}</div></div>
-    ${totIn>0?`<div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Entrate</div><div class="stat-val sm in">${eur(totIn)}</div></div>
-    <div class="stat"><div class="stat-lbl">Saldo</div><div class="stat-val sm ${saldo>=0?'saldo-pos':'saldo-neg'}">${eur(saldo)}</div></div>`:''}
-    <div class="stat" style="--accent-c:var(--terra-soft)"><div class="stat-lbl">Uscite questo mese</div><div class="stat-val sm">${eur(mese)}</div></div>
-    ${meseIn>0?`<div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Entrate questo mese</div><div class="stat-val sm in">${eur(meseIn)}</div></div>`:''}
-    <div class="stat"><div class="stat-lbl">Progetti attivi</div><div class="stat-val">${active.length}</div>
-      ${state.projects.length>active.length?`<div class="stat-hint">+${state.projects.length-active.length} archiviati</div>`:''}</div>
-    ${daPagare>0?`<div class="stat" style="--accent-c:#f8eed8"><div class="stat-lbl">Da pagare</div><div class="stat-val sm danger">${eur(daPagare)}</div></div>`:''}`;
+    <div class="stat" style="--accent-c:var(--terra-soft)"><div class="stat-lbl">Uscite mese</div><div class="stat-val sm">${eur(mese)}</div></div>
+    <div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Entrate mese</div><div class="stat-val sm in">${eur(meseIn)}</div></div>
+    <div class="stat"><div class="stat-lbl">Totale uscite</div><div class="stat-val sm">${eur(tot)}</div></div>
+    <div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Totale entrate</div><div class="stat-val sm in">${eur(totIn)}</div></div>
+    <div class="stat"><div class="stat-lbl">Progetti</div><div class="stat-val">${active.length}</div>
+      ${state.projects.length>active.length?`<div class="stat-hint">+${state.projects.length-active.length} archiviati</div>`:''}</div>`;
 
-  // chart (solo uscite)
-  const items=active.map((p,i)=>({name:p.nome,val:sum(outOf(projSpese(p.id))),color:p.colore||COLORS[i%COLORS.length]}))
-    .filter(x=>x.val>0).sort((a,b)=>b.val-a.val);
-  document.getElementById('homeChart').innerHTML=
-    items.length>1?chartCard('Uscite per progetto',items,sum(items.map(i=>({importo:i.val}))),sparkline(usc)):'';
+  // tabella riepilogo progetti
+  if(active.length){
+    let rows='',tu=0,te=0;
+    active.forEach(p=>{
+      const sp=projSpese(p.id), u=sum(outOf(sp)), e=sum(inOf(sp)), s=e-u;
+      tu+=u;te+=e;
+      rows+=`<tr onclick="openProject('${p.id}')">
+        <td><span class="tb-ic">${p.icona||'📁'}</span>${esc(p.nome)}</td>
+        <td class="num">${eur(u)}</td>
+        <td class="num in">${eur(e)}</td>
+        <td class="num ${s>=0?'saldo-pos':'saldo-neg'}">${eur(s)}</td></tr>`;
+    });
+    const ts=te-tu;
+    document.getElementById('homeChart').innerHTML=`<div class="chart-card" style="padding:0;overflow:hidden">
+      <div class="tb-wrap"><table class="tb">
+        <thead><tr><th>Progetto</th><th class="num">Uscite</th><th class="num">Entrate</th><th class="num">Saldo</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr><td>Totale</td><td class="num">${eur(tu)}</td><td class="num in">${eur(te)}</td>
+          <td class="num ${ts>=0?'saldo-pos':'saldo-neg'}">${eur(ts)}</td></tr></tfoot>
+      </table></div></div>`;
+  }else document.getElementById('homeChart').innerHTML='';
 
   // toolbar
   document.getElementById('homeToolbar').style.display=state.projects.length>3?'flex':'none';
@@ -707,16 +739,15 @@ function renderHome(){
       <div class="pcard-name">${esc(p.nome)}</div>
       <div class="pcard-desc">${esc(p.descrizione||'')}</div>
       ${bud>0?`<div class="prog"><div class="prog-fill ${pcls}" style="width:${pct}%"></div></div>`:''}
-      <div class="pcard-foot">
-        <div><div class="stat-lbl">Uscite</div><div class="pcard-tot" style="color:${t>bud&&bud>0?'var(--danger)':'var(--text)'}">${eur(t)}</div>
-        ${tin>0?`<div style="font-size:.76rem;color:var(--sage-deep);font-weight:600;margin-top:3px">+ ${eur(tin)} entrate</div>`:''}</div>
-        <div class="pcard-meta">
-          ${sp.length} voci · ${nc} cat.<br>
-          ${bud>0?`budget ${eurc(bud)}`:''}
-          ${tin>0?`<br><span class="tag" style="background:var(--sage-pale);color:var(--sage-deep)">saldo ${eurc(tin-t)}</span>`:''}
-          ${unpaid>0?`<br><span class="tag warn">${eurc(unpaid)} da pagare</span>`:''}
-          ${p.stato==='archiviato'?'<br><span class="tag archived">archiviato</span>':''}
-        </div>
+      <div class="pcard-foot pcard-3">
+        <div><div class="stat-lbl">Uscite</div><div class="pc-v" style="color:${t>bud&&bud>0?'var(--danger)':'var(--text)'}">${eur(t)}</div></div>
+        <div><div class="stat-lbl">Entrate</div><div class="pc-v in">${eur(tin)}</div></div>
+        <div><div class="stat-lbl">Saldo</div><div class="pc-v ${tin-t>=0?'saldo-pos':'saldo-neg'}">${eur(tin-t)}</div></div>
+      </div>
+      <div class="pcard-meta" style="text-align:left;margin-top:10px;position:relative;z-index:1">
+        ${sp.length} voci · ${nc} cat.${bud>0?` · budget ${eurc(bud)}`:''}
+        ${unpaid>0?` <span class="tag warn">${eurc(unpaid)} da pagare</span>`:''}
+        ${p.stato==='archiviato'?' <span class="tag archived">archiviato</span>':''}
       </div></div>`;
   });
   if(!state.showArchived) h+=`<div class="add-card" onclick="openNewProject()"><div class="p">＋</div><span>Nuovo progetto</span></div>`;
@@ -904,6 +935,7 @@ function rowsHTML(list){
       </div>
       <div class="row-acts">
         <button class="rbtn" onclick="openEditSpesa('${s.id}')" title="Modifica">✏️</button>
+        <button class="rbtn" onclick="openEditSpesa('${s.id}',true)" title="Sposta in altro progetto">⇄</button>
         <button class="rbtn" onclick="dupSpesa('${s.id}')" title="Duplica">⧉</button>
         <button class="rbtn del" onclick="askDeleteSpesa('${s.id}')" title="Elimina">🗑</button>
       </div></div>`;
@@ -1001,10 +1033,14 @@ document.getElementById('cfSave').onclick=async function(){
 };
 
 /* ── SPESA ── */
-function fillCatSelect(sel){
+function fillProjSelect(pid){
+  document.getElementById('sfProj').innerHTML=state.projects
+    .map(p=>`<option value="${p.id}" ${p.id===pid?'selected':''}>${p.icona||'📁'} ${esc(p.nome)}${p.stato==='archiviato'?' (archiviato)':''}</option>`).join('');
+}
+function fillCatSelect(sel,pid){
   const s=document.getElementById('sfCat');
   s.innerHTML='<option value="">— Nessuna —</option>'+
-    projCats(state.pid).map(c=>`<option value="${c.id}" ${sel===c.id?'selected':''}>${c.icona||'📁'} ${esc(c.nome)}</option>`).join('');
+    projCats(pid||state.pid).map(c=>`<option value="${c.id}" ${sel===c.id?'selected':''}>${c.icona||'📁'} ${esc(c.nome)}</option>`).join('');
 }
 function resetDrop(){
   const d=document.getElementById('sfDrop');
@@ -1033,6 +1069,7 @@ function openNewSpesa(){
   document.getElementById('sfMetodo').value='';
   document.getElementById('sfPagato').classList.add('on');
   setTipo('uscita');
+  document.getElementById('sfProjWrap').style.display='none';
   fillCatSelect();resetDrop();openSheet('shSpesa');
   setTimeout(()=>document.getElementById('sfDesc').focus(),120);
 }
@@ -1041,7 +1078,7 @@ function openNewEntrata(){
   openNewSpesa();
   setTipo('entrata');
 }
-function openEditSpesa(id){
+function openEditSpesa(id,focusMove){
   const s=state.spese.find(x=>x.id===id);if(!s)return;
   state.editS=id;
   document.getElementById('sfData').value=s.data||todayISO();
@@ -1052,7 +1089,10 @@ function openEditSpesa(id){
   document.getElementById('sfMetodo').value=s.metodo_pagamento||'';
   document.getElementById('sfPagato').classList.toggle('on',s.pagato!==false);
   setTipo(s.tipo==='entrata'?'entrata':'uscita');
-  fillCatSelect(s.categoria_id);
+  fillProjSelect(s.progetto_id);
+  document.getElementById('sfProjWrap').style.display='block';
+  fillCatSelect(s.categoria_id,s.progetto_id);
+  if(focusMove)setTimeout(()=>{const el=document.getElementById('sfProj');el.scrollIntoView({block:'center'});el.focus()},250);
   resetDrop();
   if(s.allegato_base64){
     const d=document.getElementById('sfDrop');d.className='drop has';
@@ -1084,6 +1124,7 @@ document.getElementById('sfSave').onclick=async function(){
   const d={
     data,importo,descrizione,tipo:state.tipo,
     categoria_id:document.getElementById('sfCat').value||null,
+    ...(state.editS?{progetto_id:document.getElementById('sfProj').value}:{}),
     fornitore:document.getElementById('sfForn').value.trim()||null,
     note:document.getElementById('sfNote').value.trim()||null,
     metodo_pagamento:document.getElementById('sfMetodo').value||null,
@@ -1096,7 +1137,10 @@ document.getElementById('sfSave').onclick=async function(){
     if(state.editS){
       const r=await api.patch('spese',state.editS,d);
       Object.assign(state.spese.find(x=>x.id===state.editS),r[0]);
-      toast(state.tipo==='entrata'?'Entrata aggiornata':'Spesa aggiornata','ok');
+      if(r[0].progetto_id!==state.pid){
+        const dest=state.projects.find(p=>p.id===r[0].progetto_id);
+        toast('Spostato in "'+(dest?dest.nome:'altro progetto')+'"','ok');
+      }else toast(state.tipo==='entrata'?'Entrata aggiornata':'Spesa aggiornata','ok');
     }else{
       const r=await api.post('spese',{...d,progetto_id:state.pid});
       state.spese.unshift(r[0]);
