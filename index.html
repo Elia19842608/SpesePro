@@ -428,7 +428,6 @@ select.fc{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='
     </div>
 
     <div class="stat-strip" id="homeStats"></div>
-    <div id="homeChart"></div>
 
     <div id="abbLink"></div>
     <div class="sec-title" id="listTitle">Progetti</div>
@@ -801,28 +800,6 @@ function renderHome(){
     <div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Totale entrate</div><div class="stat-val sm in">${eur(totIn)}</div></div>
     <div class="stat"><div class="stat-lbl">Progetti</div><div class="stat-val">${active.length}</div>
       ${state.projects.length>active.length?`<div class="stat-hint">+${state.projects.length-active.length} archiviati</div>`:''}</div>`;
-
-  // tabella riepilogo progetti
-  if(active.length){
-    let rows='',tu=0,te=0;
-    active.forEach(p=>{
-      const sp=projSpese(p.id), u=sum(outOf(sp)), e=sum(inOf(sp)), s=e-u;
-      tu+=u;te+=e;
-      rows+=`<tr onclick="openProject('${p.id}')">
-        <td><span class="tb-ic">${p.icona||'📁'}</span>${esc(p.nome)}</td>
-        <td class="num">${eur(u)}</td>
-        <td class="num in">${eur(e)}</td>
-        <td class="num ${s>=0?'saldo-pos':'saldo-neg'}">${eur(s)}</td></tr>`;
-    });
-    const ts=te-tu;
-    document.getElementById('homeChart').innerHTML=`<div class="chart-card" style="padding:0;overflow:hidden">
-      <div class="tb-wrap"><table class="tb">
-        <thead><tr><th>Progetto</th><th class="num">Uscite</th><th class="num">Entrate</th><th class="num">Saldo</th></tr></thead>
-        <tbody>${rows}</tbody>
-        <tfoot><tr><td>Totale</td><td class="num">${eur(tu)}</td><td class="num in">${eur(te)}</td>
-          <td class="num ${ts>=0?'saldo-pos':'saldo-neg'}">${eur(ts)}</td></tr></tfoot>
-      </table></div></div>`;
-  }else document.getElementById('homeChart').innerHTML='';
 
   // toolbar
   document.getElementById('homeToolbar').style.display=state.projects.length>3?'flex':'none';
