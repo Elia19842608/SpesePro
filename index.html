@@ -944,7 +944,9 @@ function toggleUnpaid(){state.onlyUnpaid=!state.onlyUnpaid;renderProject()}
 
 /* ═══════════════ PROJECT ═══════════════ */
 function openProject(id){
-  state.pid=id;state.onlyUnpaid=false;state.collapsed=new Set();
+  state.pid=id;state.onlyUnpaid=false;
+  // di default tutte le categorie sono chiuse
+  state.collapsed=new Set([...projCats(id).map(c=>c.id),'ent','nc']);
   const q=document.getElementById('qSpese');if(q)q.value='';
   document.getElementById('vHome').classList.remove('on');
   document.getElementById('vAbb').classList.remove('on');
@@ -1047,7 +1049,7 @@ function renderProject(){
     if(!allOut.length&&!allIn.length)return;
 
     const t=sum(allOut), tIn=sum(allIn), cb=parseFloat(c.budget||0), col=COLORS[i%COLORS.length];
-    const cl=state.collapsed.has(c.id);
+    const cl=state.collapsed.has(c.id)&&!q;
     const netTot = tIn>0 ? `${t>0?eur(t):''}${t>0&&tIn>0?' · ':''}${tIn>0?'<span style="color:var(--sage-deep)">+ '+eur(tIn)+'</span>':''}` : eur(t);
     h+=`<div class="cat">
       <div class="cat-hd" onclick="toggleCat('${c.id}')">
@@ -1077,7 +1079,7 @@ function renderProject(){
   }).sort((a,b)=>sortFn(a,b,sort));
   const allEntNoCat=entrate.filter(s=>!s.categoria_id);
   if(entNoCat.length){
-    const cl=state.collapsed.has('ent');
+    const cl=state.collapsed.has('ent')&&!q;
     h+=`<div class="cat entrate">
       <div class="cat-hd" onclick="toggleCat('ent')">
         <div class="cat-ic" style="--cc:var(--sage-soft)">${uic('cash')}</div>
@@ -1089,7 +1091,7 @@ function renderProject(){
   }
   const nocat=filtered.filter(s=>!s.categoria_id);
   if(nocat.length){
-    const cl=state.collapsed.has('nc');
+    const cl=state.collapsed.has('nc')&&!q;
     h+=`<div class="cat">
       <div class="cat-hd" onclick="toggleCat('nc')">
         <div class="cat-ic" style="--cc:#e2ddd2">${uic('help')}</div>
