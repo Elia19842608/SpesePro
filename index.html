@@ -157,6 +157,8 @@ main{padding:22px 18px calc(90px + var(--safe-b));max-width:1240px;margin:0 auto
 }
 .ico{width:1em;height:1em;display:block;flex-shrink:0}
 .mi .ico{width:14px;height:14px}
+.mini-btn .ico{width:15px;height:15px}
+.rbtn .ico{width:16px;height:16px}
 .pcard-icon,.cat-ic,.em{color:var(--sage-deep)}
 .pcard-icon .ico{width:24px;height:24px}
 .pcard[style*="--c"] .pcard-icon{background:color-mix(in srgb,var(--c) 26%,#fff);border-color:color-mix(in srgb,var(--c) 45%,#fff);color:color-mix(in srgb,var(--c) 72%,#000)}
@@ -443,7 +445,7 @@ select.fc{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='
       <div style="flex:1;min-width:200px">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <div class="page-title" id="pTitle" style="font-size:1.85rem">—</div>
-          <button class="mini-btn" onclick="openEditProject(state.pid)" title="Modifica">✏️</button>
+          <button class="mini-btn" onclick="openEditProject(state.pid)" title="Modifica"><span id="pEditIc"></span></button>
         </div>
         <div class="page-sub" id="pDesc"></div>
       </div>
@@ -689,6 +691,10 @@ const ICONS={"folder": "<path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 
 const DEF_IC='i:folder';
 // icona: 'i:chiave' = SVG moderna, altrimenti emoji (progetti vecchi)
 const ico=v=>{v=v||DEF_IC;return v.startsWith('i:')&&ICONS[v.slice(2)]?`<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[v.slice(2)]}</svg>`:esc(v)};
+const UI_IC={
+edit:'<path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/>',
+trash:'<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6M14 11v6"/>'};
+const uic=n=>`<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${UI_IC[n]}</svg>`;
 const icT=v=>v&&!v.startsWith('i:')?v:'';
 const EMOJIS=Object.keys(ICONS).map(k=>'i:'+k);
 
@@ -840,8 +846,8 @@ function renderHome(){
       <div class="pcard-top">
         <div class="pcard-icon">${ico(p.icona)}</div>
         <div class="pcard-acts">
-          <button class="mini-btn" onclick="event.stopPropagation();openEditProject('${p.id}')" title="Modifica">✏️</button>
-          <button class="mini-btn del" onclick="event.stopPropagation();askDeleteProject('${p.id}')" title="Elimina">🗑</button>
+          <button class="mini-btn" onclick="event.stopPropagation();openEditProject('${p.id}')" title="Modifica">${uic('edit')}</button>
+          <button class="mini-btn del" onclick="event.stopPropagation();askDeleteProject('${p.id}')" title="Elimina">${uic('trash')}</button>
         </div>
       </div>
       <div class="pcard-name">${esc(p.nome)}</div>
@@ -918,6 +924,7 @@ function goHome(){
 function fabAction(){state.pid?openNewSpesa():openNewProject()}
 
 function renderProject(){
+  const _pe=document.getElementById('pEditIc');if(_pe)_pe.innerHTML=uic('edit');
   const p=state.projects.find(x=>x.id===state.pid);if(!p)return goHome();
   const period=getPeriod(p.id), allProj=projSpese(p.id), cats=projCats(p.id);
   const allMov=inPeriod(allProj,period);
@@ -1009,7 +1016,7 @@ function renderProject(){
         </div>
         <div class="cat-rt">
           <span class="cat-tot">${netTot}</span>
-          <button class="mini-btn" onclick="event.stopPropagation();openEditCat('${c.id}')">✏️</button>
+          <button class="mini-btn" onclick="event.stopPropagation();openEditCat('${c.id}')">${uic('edit')}</button>
           <span class="chev ${cl?'cl':''}">▼</span>
         </div>
       </div>
@@ -1071,10 +1078,10 @@ function rowsHTML(list){
         <div class="row-meta">${meta.join('')}</div>
       </div>
       <div class="row-acts">
-        <button class="rbtn" onclick="openEditSpesa('${s.id}')" title="Modifica">✏️</button>
+        <button class="rbtn" onclick="openEditSpesa('${s.id}')" title="Modifica">${uic('edit')}</button>
         <button class="rbtn" onclick="openEditSpesa('${s.id}',true)" title="Sposta in altro progetto">⇄</button>
         <button class="rbtn" onclick="dupSpesa('${s.id}')" title="Duplica">⧉</button>
-        <button class="rbtn del" onclick="askDeleteSpesa('${s.id}')" title="Elimina">🗑</button>
+        <button class="rbtn del" onclick="askDeleteSpesa('${s.id}')" title="Elimina">${uic('trash')}</button>
       </div></div>`;
   }).join('')+'</div>';
 }
@@ -1428,8 +1435,8 @@ function renderAbb(){
         </div>
         <div class="row-acts">
           ${off?'':`<button class="rbtn" onclick="payAbb('${a.id}')" title="Registra pagamento">✓</button>`}
-          <button class="rbtn" onclick="openEditAbb('${a.id}')" title="Modifica">✏️</button>
-          <button class="rbtn del" onclick="askDelAbb('${a.id}')" title="Elimina">🗑</button>
+          <button class="rbtn" onclick="openEditAbb('${a.id}')" title="Modifica">${uic('edit')}</button>
+          <button class="rbtn del" onclick="askDelAbb('${a.id}')" title="Elimina">${uic('trash')}</button>
         </div></div>`;
     }).join('')+'</div></div>';
   }
@@ -1449,7 +1456,7 @@ function renderAbb(){
     return `<div class="pcard kcard ${off?'archived':''}" style="--c:${k.utenza==='Luce'?'#c2a05f':k.utenza==='Gas'?'#cf9174':k.utenza==='Acqua'?'#8fa8b8':'#a4b39a'}" onclick="openEditContr('${k.id}')">
       <div class="pcard-top">
         <div class="pcard-icon">${U.ic}</div>
-        <div class="pcard-acts"><button class="mini-btn del" onclick="event.stopPropagation();askDelContr('${k.id}')" title="Elimina">🗑</button></div>
+        <div class="pcard-acts"><button class="mini-btn del" onclick="event.stopPropagation();askDelContr('${k.id}')" title="Elimina">${uic('trash')}</button></div>
       </div>
       <div class="stat-lbl" style="position:relative;z-index:1">${esc(k.utenza)}${off?' · non attivo':''}</div>
       <div class="pcard-name">${esc(k.fornitore)}</div>
@@ -1515,7 +1522,7 @@ function nextDate(iso,freq){
 }
 async function payAbb(id){
   const a=state.abb.find(x=>x.id===id);if(!a)return;
-  if(!a.progetto_id){toast('Scegli prima un progetto in cui registrarla (✏️)','err');return openEditAbb(id)}
+  if(!a.progetto_id){toast('Scegli prima un progetto in cui registrarla (modifica)','err');return openEditAbb(id)}
   const data=a.prossimo_addebito&&a.prossimo_addebito<=todayISO()?a.prossimo_addebito:todayISO();
   try{
     const r=await api.post('spese',{progetto_id:a.progetto_id,tipo:'uscita',data,importo:a.importo,descrizione:a.nome,
