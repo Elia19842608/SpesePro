@@ -496,6 +496,14 @@ body{letter-spacing:-.005em}
 .row-amt:not(.in){color:var(--danger)}
 .row-amt:not(.in)::before{content:'−'}
 .row-amt.unpaid{color:var(--danger)}
+.row.abb-row{display:flex;align-items:center;gap:12px;padding:12px 10px}
+.abb-row .row-main{flex:1;min-width:0}
+.abb-row .row-acts{flex-shrink:0}
+.abb-row .row-meta{margin-top:5px}
+.abb-row .row-meta .mi{background:var(--surface3);padding:3px 9px;border-radius:100px;font-size:.7rem}
+.cat-ic.brand{background:#fff;border:1px solid var(--border-soft);overflow:hidden;padding:7px}
+.cat-ic.brand img{width:100%;height:100%;object-fit:contain;border-radius:6px}
+.cat-ic.brand .fb{width:100%}
 </style>
 </head>
 <body>
@@ -1492,6 +1500,31 @@ state.abb=[];state.contr=[];state.abbShowOff=false;state.editA=null;state.editK=
 const FREQ={settimanale:52,mensile:12,bimestrale:6,trimestrale:4,semestrale:2,annuale:1};
 const FREQ_LBL={settimanale:'a settimana',mensile:'al mese',bimestrale:'ogni 2 mesi',trimestrale:'ogni 3 mesi',semestrale:'ogni 6 mesi',annuale:"all'anno"};
 const TIPI_ABB={'Streaming':'tv','Internet e telefono':'globe','Telefonia mobile':'phone','Assicurazione':'shield','Software e app':'laptop','Sport e palestra':'dumbbell','Rata e finanziamento':'bank','Altro':'repeat'};
+
+/* loghi dei servizi più comuni (riconosciuti dal nome) */
+const BRANDS=[
+ [/netflix/,'netflix.com'],[/prime|amazon/,'primevideo.com'],[/disney/,'disneyplus.com'],[/spotify/,'spotify.com'],
+ [/youtube/,'youtube.com'],[/apple music|itunes/,'music.apple.com'],[/apple tv/,'tv.apple.com'],[/icloud/,'icloud.com'],[/apple/,'apple.com'],
+ [/dazn/,'dazn.com'],[/\bnow\b|now tv/,'nowtv.it'],[/sky/,'sky.it'],[/infinity|mediaset/,'mediasetinfinity.mediaset.it'],
+ [/paramount/,'paramountplus.com'],[/discovery|dplay/,'discoveryplus.com'],[/raiplay|rai play/,'raiplay.it'],
+ [/audible/,'audible.it'],[/kindle/,'amazon.it'],[/deezer/,'deezer.com'],[/tidal/,'tidal.com'],[/twitch/,'twitch.tv'],
+ [/playstation|ps plus|psn/,'playstation.com'],[/xbox|game pass/,'xbox.com'],[/nintendo/,'nintendo.com'],[/steam/,'steampowered.com'],
+ [/chatgpt|openai/,'openai.com'],[/claude|anthropic/,'claude.ai'],[/gemini|google one|google/,'google.com'],
+ [/microsoft|office 365|m365|onedrive/,'microsoft.com'],[/adobe|photoshop|creative cloud/,'adobe.com'],[/dropbox/,'dropbox.com'],
+ [/notion/,'notion.so'],[/canva/,'canva.com'],[/linkedin/,'linkedin.com'],[/duolingo/,'duolingo.com'],[/github/,'github.com'],
+ [/zoom/,'zoom.us'],[/slack/,'slack.com'],[/1password/,'1password.com'],[/nordvpn|nord vpn/,'nordvpn.com'],[/expressvpn/,'expressvpn.com'],
+ [/tim\b|tim vision/,'tim.it'],[/vodafone/,'vodafone.it'],[/wind|windtre|wind3/,'windtre.it'],[/iliad/,'iliad.it'],[/fastweb/,'fastweb.it'],
+ [/ho\.? mobile|ho mobile/,'ho-mobile.it'],[/kena/,'kenamobile.it'],[/very mobile/,'verymobile.it'],[/poste|postepay/,'poste.it'],
+ [/enel/,'enel.it'],[/eni plenitude|plenitude/,'eniplenitude.com'],[/a2a/,'a2a.it'],[/edison/,'edisonenergia.it'],[/hera/,'gruppohera.it'],
+ [/unipol/,'unipol.it'],[/generali/,'generali.it'],[/axa/,'axa.it'],[/allianz/,'allianz.it'],[/zurich/,'zurich.it'],
+ [/revolut/,'revolut.com'],[/paypal/,'paypal.com'],[/satispay/,'satispay.com'],[/tinder/,'tinder.com'],[/telepass/,'telepass.com'],
+ [/ryanair/,'ryanair.com'],[/just eat|justeat/,'justeat.it'],[/glovo/,'glovoapp.com'],[/deliveroo/,'deliveroo.it'],[/uber/,'uber.com'],
+ [/wordpress/,'wordpress.com'],[/aruba/,'aruba.it'],[/shopify/,'shopify.com'],[/mailchimp/,'mailchimp.com'],[/gympass|wellhub/,'wellhub.com'],
+ [/technogym/,'technogym.com'],[/fitbit/,'fitbit.com'],[/strava/,'strava.com'],[/headspace/,'headspace.com'],[/calm/,'calm.com']
+];
+const brandDomain=n=>{n=(n||'').toLowerCase();const m=n.match(/[a-z0-9-]+\.(com|it|net|org|io|tv|app|co)\b/);if(m)return m[0];const b=BRANDS.find(([r])=>r.test(n));return b?b[1]:null};
+const brandTile=(a,fb)=>{const d=brandDomain(a.nome);if(!d)return `<div class="cat-ic" style="--cc:var(--sage-pale);width:42px;height:42px">${fb}</div>`;
+  return `<div class="cat-ic brand" style="width:42px;height:42px"><img src="https://www.google.com/s2/favicons?domain=${d}&sz=128" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="fb" style="display:none">${fb}</span></div>`};
 const UTENZE={Luce:{ic:'zap',u:'€/kWh',cod:'Codice POD'},Gas:{ic:'flame',u:'€/Smc',cod:'Codice PDR'},Acqua:{ic:'droplet',u:'€/m³',cod:'Codice utenza'},Altro:{ic:'plug',u:'€/unità',cod:'Codice'}};
 const mensile=a=>parseFloat(a.importo||0)*(FREQ[a.frequenza]||12)/12;
 const daysTo=d=>{if(!d)return null;const t=new Date(todayISO());return Math.round((new Date(d)-t)/864e5)};
@@ -1550,8 +1583,8 @@ function renderAbb(){
       if(proj)meta.push(`<span class="mi">${ico(proj.icona)} ${esc(proj.nome)}</span>`);
       if(a.note)meta.push(`<span class="mi note">“${esc(a.note.slice(0,80))}”</span>`);
       const sub=a.frequenza!=='mensile'?`<div class="abb-sub">${eur(mensile(a))}/mese</div>`:'';
-      return `<div class="row ${off?'abb-off':''}">
-        <div class="cat-ic" style="--cc:var(--sage-pale);width:36px;height:36px">${uic(TIPI_ABB[a.tipo]||'repeat')}</div>
+      return `<div class="row abb-row ${off?'abb-off':''}">
+        ${brandTile(a,uic(TIPI_ABB[a.tipo]||'repeat'))}
         <div class="row-main">
           <div class="row-t"><div class="row-desc">${esc(a.nome)}</div>
             <div style="text-align:right"><div class="row-amt">${eur(a.importo)}</div><div class="abb-freq">${FREQ_LBL[a.frequenza]||''}</div>${sub}</div></div>
