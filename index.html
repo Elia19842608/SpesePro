@@ -144,12 +144,11 @@ main{padding:22px 18px calc(90px + var(--safe-b));max-width:1240px;margin:0 auto
   padding:20px;cursor:pointer;transition:.26s cubic-bezier(.2,.8,.3,1);position:relative;overflow:hidden;box-shadow:var(--sh-xs);
 }
 .pcard::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:88px;
-  background:linear-gradient(150deg,var(--c,var(--sage)) 0%,transparent 80%);opacity:.34;transition:.26s;pointer-events:none;
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(130% 85% at 0% 0%,var(--c,var(--sage)) 0%,transparent 62%);opacity:.2;transition:.26s;pointer-events:none;
 }
 .pcard:hover{transform:translateY(-3px);box-shadow:var(--sh-lg);border-color:var(--c,var(--sage))}
-.pcard:hover::before{opacity:.5}
-.pcard::after{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--c,var(--sage));pointer-events:none}
+.pcard:hover::before{opacity:.32}
 .pcard.archived{opacity:.62}
 .pcard-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;position:relative;z-index:1;margin-bottom:14px}
 .pcard-icon{
