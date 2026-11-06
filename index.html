@@ -933,7 +933,11 @@ function renderHome(){
   const meseIn=sum(ent.filter(s=>(s.data||'').startsWith(m)));
   document.getElementById('homeSub').textContent=
     `${active.length} attiv${active.length===1?'o':'i'} · ${allSp.length} movimenti registrati`;
+  const saldoM=meseIn-mese;
+  const saldoFmt=saldoM>0?`<span class="saldo-pos">+${eur(saldoM)}</span>`:saldoM<0?`<span class="neg">−${eur(-saldoM)}</span>`:eur(0);
   document.getElementById('homeStats').innerHTML=`
+    <div class="stat" style="--accent-c:${saldoM>=0?'var(--sage-pale)':'var(--danger-soft)'}"><div class="stat-lbl">Saldo del mese</div><div class="stat-val">${saldoFmt}</div>
+      <div class="stat-hint">${saldoM>0?'entrate sopra le uscite · in attivo':saldoM<0?'uscite sopra le entrate · in passivo':'entrate e uscite in pari'}</div></div>
     <div class="stat" style="--accent-c:var(--terra-soft)"><div class="stat-lbl">Uscite mese</div><div class="stat-val sm">${out(mese)}</div></div>
     <div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Entrate mese</div><div class="stat-val sm in">${eur(meseIn)}</div></div>
     <div class="stat"><div class="stat-lbl">Totale uscite</div><div class="stat-val sm">${out(tot)}</div></div>
