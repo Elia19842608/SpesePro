@@ -1072,21 +1072,25 @@ function renderProject(){
   const avg=all.length?tot/all.length:0;
   const m=todayISO().slice(0,7), mese=sum(all.filter(s=>(s.data||'').startsWith(m))), meseIn=sum(entrate.filter(s=>(s.data||'').startsWith(m)));
   const rim=bud-totAllTime;
+  const allM=outOf(allProj), entM=inOf(allProj);
+  const meseU=sum(allM.filter(s=>(s.data||'').startsWith(m))), meseE=sum(entM.filter(s=>(s.data||'').startsWith(m)));
+  const saldoM=meseE-meseU;
+  const saldoFmt=saldoM>0?`<span class="saldo-pos">+${eur(saldoM)}</span>`:saldoM<0?`<span class="neg">−${eur(-saldoM)}</span>`:eur(0);
+  const pl=PERIOD_LBL[period]?' · '+PERIOD_LBL[period]:'';
   document.getElementById('pStats').innerHTML=`
-    <div class="stat"><div class="stat-lbl">Uscite${PERIOD_LBL[period]?' · '+PERIOD_LBL[period]:''}</div><div class="stat-val">${out(tot)}</div>
+    <div class="stat" style="--accent-c:${saldoM>=0?'var(--sage-pale)':'var(--danger-soft)'}"><div class="stat-lbl">Saldo del mese</div><div class="stat-val">${saldoFmt}</div>
+      <div class="stat-hint">${saldoM>0?'entrate sopra le uscite · in attivo':saldoM<0?'uscite sopra le entrate · in passivo':'entrate e uscite in pari'}</div></div>
+    <div class="stat" style="--accent-c:var(--terra-soft)"><div class="stat-lbl">Uscite mese</div><div class="stat-val sm">${out(meseU)}</div></div>
+    <div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Entrate mese</div><div class="stat-val sm in">${eur(meseE)}</div></div>
+    <div class="stat"><div class="stat-lbl">Totale uscite${pl}</div><div class="stat-val sm">${out(tot)}</div>
       <div class="stat-hint">${all.length} spese · media ${eurc(avg)}</div></div>
-    ${totIn>0?`<div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Entrate</div>
-      <div class="stat-val sm in">${eur(totIn)}</div><div class="stat-hint">${entrate.length} movimenti</div></div>
-    <div class="stat"><div class="stat-lbl">Saldo</div>
-      <div class="stat-val sm ${saldo>=0?'saldo-pos':'saldo-neg'}">${eur(saldo)}</div>
-      <div class="stat-hint">${saldo>=0?'in attivo':'in passivo'}</div></div>`:''}
+    <div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Totale entrate${pl}</div><div class="stat-val sm in">${eur(totIn)}</div>
+      <div class="stat-hint">${entrate.length} movimenti</div></div>
     ${bud>0?`<div class="stat"><div class="stat-lbl">Budget</div><div class="stat-val sm">${eur(bud)}</div>
       <div class="prog" style="margin-top:8px"><div class="prog-fill ${totAllTime>bud?'over':(totAllTime/bud>.85?'warn':'')}" style="width:${Math.min(100,totAllTime/bud*100)}%"></div></div></div>
     <div class="stat"><div class="stat-lbl">${rim>=0?'Rimanente':'Sforamento'}</div>
       <div class="stat-val sm ${rim>=0?'ok':'danger'}">${eur(Math.abs(rim))}</div>
-      <div class="stat-hint">${bud>0?Math.round(totAllTime/bud*100):0}% utilizzato</div></div>`:''}
-    <div class="stat" style="--accent-c:var(--terra-soft)"><div class="stat-lbl">Uscite questo mese</div><div class="stat-val sm">${out(mese)}</div></div>
-    ${meseIn>0?`<div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Entrate questo mese</div><div class="stat-val sm in">${eur(meseIn)}</div></div>`:''}
+      <div class="stat-hint">${Math.round(totAllTime/bud*100)}% utilizzato</div></div>`:''}
     ${unpaid>0?`<div class="stat" style="--accent-c:#f8eed8"><div class="stat-lbl">Da pagare</div><div class="stat-val sm danger">${eur(unpaid)}</div></div>`:''}`;
 
   // chart per categoria
