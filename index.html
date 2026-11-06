@@ -492,6 +492,10 @@ body{letter-spacing:-.005em}
   .stat:last-child:nth-child(even){grid-column:auto}
   .grid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
 }
+.neg{color:var(--danger)}
+.row-amt:not(.in){color:var(--danger)}
+.row-amt:not(.in)::before{content:'−'}
+.row-amt.unpaid{color:var(--danger)}
 </style>
 </head>
 <body>
@@ -813,6 +817,7 @@ const icT=v=>v&&!v.startsWith('i:')?v:'';
 const EMOJIS=Object.keys(ICONS).map(k=>'i:'+k);
 
 /* ═══════════════ UTILS ═══════════════ */
+const out = v => {const n=parseFloat(v)||0;return n>0?`<span class="neg">−${eur(n)}</span>`:eur(0)};
 const eur = v => new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(v||0);
 const eurc = v => new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(v||0);
 const esc = s => String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -929,9 +934,9 @@ function renderHome(){
   document.getElementById('homeSub').textContent=
     `${active.length} attiv${active.length===1?'o':'i'} · ${allSp.length} movimenti registrati`;
   document.getElementById('homeStats').innerHTML=`
-    <div class="stat" style="--accent-c:var(--terra-soft)"><div class="stat-lbl">Uscite mese</div><div class="stat-val sm">${eur(mese)}</div></div>
+    <div class="stat" style="--accent-c:var(--terra-soft)"><div class="stat-lbl">Uscite mese</div><div class="stat-val sm">${out(mese)}</div></div>
     <div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Entrate mese</div><div class="stat-val sm in">${eur(meseIn)}</div></div>
-    <div class="stat"><div class="stat-lbl">Totale uscite</div><div class="stat-val sm">${eur(tot)}</div></div>
+    <div class="stat"><div class="stat-lbl">Totale uscite</div><div class="stat-val sm">${out(tot)}</div></div>
     <div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Totale entrate</div><div class="stat-val sm in">${eur(totIn)}</div></div>
     <div class="stat"><div class="stat-lbl">Progetti</div><div class="stat-val">${active.length}</div>
       ${state.projects.length>active.length?`<div class="stat-hint">+${state.projects.length-active.length} archiviati</div>`:''}</div>`;
@@ -971,7 +976,7 @@ function renderHome(){
       ${p.descrizione?`<div class="pcard-desc">${esc(p.descrizione)}</div>`:''}
       ${bud>0?`<div class="prog"><div class="prog-fill ${pcls}" style="width:${pct}%"></div></div>`:''}
       <div class="pcard-3">
-        <div class="pill"><div class="stat-lbl">Uscite</div><div class="pc-v" style="color:${t>bud&&bud>0?'var(--danger)':'var(--text)'}">${eur(t)}</div></div>
+        <div class="pill"><div class="stat-lbl">Uscite</div><div class="pc-v">${out(t)}</div></div>
         <div class="pill"><div class="stat-lbl">Entrate</div><div class="pc-v in">${eur(tin)}</div></div>
         <div class="pill"><div class="stat-lbl">Saldo</div><div class="pc-v ${tin-t>=0?'saldo-pos':'saldo-neg'}">${eur(tin-t)}</div></div>
       </div>
@@ -1056,7 +1061,7 @@ function renderProject(){
   const m=todayISO().slice(0,7), mese=sum(all.filter(s=>(s.data||'').startsWith(m))), meseIn=sum(entrate.filter(s=>(s.data||'').startsWith(m)));
   const rim=bud-totAllTime;
   document.getElementById('pStats').innerHTML=`
-    <div class="stat"><div class="stat-lbl">Uscite${PERIOD_LBL[period]?' · '+PERIOD_LBL[period]:''}</div><div class="stat-val">${eur(tot)}</div>
+    <div class="stat"><div class="stat-lbl">Uscite${PERIOD_LBL[period]?' · '+PERIOD_LBL[period]:''}</div><div class="stat-val">${out(tot)}</div>
       <div class="stat-hint">${all.length} spese · media ${eurc(avg)}</div></div>
     ${totIn>0?`<div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Entrate</div>
       <div class="stat-val sm in">${eur(totIn)}</div><div class="stat-hint">${entrate.length} movimenti</div></div>
@@ -1068,7 +1073,7 @@ function renderProject(){
     <div class="stat"><div class="stat-lbl">${rim>=0?'Rimanente':'Sforamento'}</div>
       <div class="stat-val sm ${rim>=0?'ok':'danger'}">${eur(Math.abs(rim))}</div>
       <div class="stat-hint">${bud>0?Math.round(totAllTime/bud*100):0}% utilizzato</div></div>`:''}
-    <div class="stat" style="--accent-c:var(--terra-soft)"><div class="stat-lbl">Uscite questo mese</div><div class="stat-val sm">${eur(mese)}</div></div>
+    <div class="stat" style="--accent-c:var(--terra-soft)"><div class="stat-lbl">Uscite questo mese</div><div class="stat-val sm">${out(mese)}</div></div>
     ${meseIn>0?`<div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Entrate questo mese</div><div class="stat-val sm in">${eur(meseIn)}</div></div>`:''}
     ${unpaid>0?`<div class="stat" style="--accent-c:#f8eed8"><div class="stat-lbl">Da pagare</div><div class="stat-val sm danger">${eur(unpaid)}</div></div>`:''}`;
 
@@ -1121,7 +1126,7 @@ function renderProject(){
 
     const t=sum(allOut), tIn=sum(allIn), cb=parseFloat(c.budget||0), col=COLORS[i%COLORS.length];
     const cl=state.collapsed.has(c.id)&&!q;
-    const netTot = tIn>0 ? `${t>0?eur(t):''}${t>0&&tIn>0?' · ':''}${tIn>0?'<span style="color:var(--sage-deep)">+ '+eur(tIn)+'</span>':''}` : eur(t);
+    const netTot = tIn>0 ? `${t>0?out(t):''}${t>0&&tIn>0?' · ':''}${tIn>0?'<span style="color:var(--sage-deep)">+ '+eur(tIn)+'</span>':''}` : out(t);
     h+=`<div class="cat">
       <div class="cat-hd" onclick="toggleCat('${c.id}')">
         <div class="cat-ic" style="--cc:${col}33">${ico(c.icona)}</div>
@@ -1168,7 +1173,7 @@ function renderProject(){
         <div class="cat-ic" style="--cc:#e2ddd2">${uic('help')}</div>
         <div class="cat-txt"><div class="cat-nm">Uscite senza categoria</div>
         <div class="cat-sub"><span>${nocat.length} spese</span></div></div>
-        <div class="cat-rt"><span class="cat-tot">${eur(sum(all.filter(s=>!s.categoria_id)))}</span><span class="chev ${cl?'cl':''}">▼</span></div>
+        <div class="cat-rt"><span class="cat-tot">${out(sum(all.filter(s=>!s.categoria_id)))}</span><span class="chev ${cl?'cl':''}">▼</span></div>
       </div>
       <div class="cat-body" style="${cl?'display:none':''}">${rowsHTML(nocat)}</div></div>`;
   }
@@ -1513,7 +1518,7 @@ function renderAbb(){
   const ka=state.contr.filter(k=>k.attivo!==false);
   const prossimi=att.filter(a=>{const d=daysTo(a.prossimo_addebito);return d!==null&&d<=30});
   document.getElementById('abbStats').innerHTML=`
-    <div class="stat" style="--accent-c:var(--terra-soft)"><div class="stat-lbl">Spesa mensile</div><div class="stat-val sm">${eur(mese)}</div><div class="stat-hint">abbonamenti attivi</div></div>
+    <div class="stat" style="--accent-c:var(--terra-soft)"><div class="stat-lbl">Spesa mensile</div><div class="stat-val sm">${out(mese)}</div><div class="stat-hint">abbonamenti attivi</div></div>
     <div class="stat"><div class="stat-lbl">Spesa annua</div><div class="stat-val sm">${eur(mese*12)}</div></div>
     <div class="stat"><div class="stat-lbl">Prossimi 30 giorni</div><div class="stat-val sm">${eur(sum(prossimi))}</div><div class="stat-hint">${prossimi.length} addebit${prossimi.length===1?'o':'i'}</div></div>
     <div class="stat" style="--accent-c:var(--sage-pale)"><div class="stat-lbl">Contratti attivi</div><div class="stat-val">${ka.length}</div></div>`;
